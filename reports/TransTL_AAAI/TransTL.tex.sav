@@ -1,0 +1,212 @@
+% !Mode:: "TeX:System"
+\def\year{2016}\relax
+%File: formatting-instruction.tex
+\documentclass[letterpaper]{article}
+\usepackage{aaai16}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage{amsfonts,amssymb}
+\usepackage{multirow}
+\frenchspacing
+\setlength{\pdfpagewidth}{8.5in}
+\setlength{\pdfpageheight}{11in}
+\pdfinfo{
+/Title (Knowledge Graph Embedding with Transfer Learning on Topic Model of Entity Description)
+/Author (Qiang~Guo)}
+\setcounter{secnumdepth}{0}
+ \begin{document}
+% The file aaai.sty is the style file for AAAI Press
+% proceedings, working notes, and technical reports.
+%
+\title{Knowledge Graph Embedding with Transfer Learning on Topic Model of Entity Description}
+\author{Qiang Guo\\
+UBRI in USTC\\
+}
+\maketitle
+\begin{abstract}
+  Knowledge graph embedding aims to encode both entities and relations into a continuous low-dimensional space.
+  Most methods concentrate on the structure information of the knowledge graph whose nodes represent the entities and edges represent the relations between entities.
+  In fact,there are usually concise text for entities,which can be modeled with topic model and well utilized by existing embedding methods.
+  In this paper,we propose a novel method for knowledge graph embedding  by uncovering the topics within the short entities descriptions and transferring the topic model to entity embedding.
+  Specifically,we learn the topics of entity description and transfer the topic model of the entity description to the knowledge embedding with transfer learning method.
+  We evaluate our method on two tasks,including knowledge graph completion and entity classification.
+  Experimental results on Freebase show that,by special modeling the topic of the entity description and transfer learning,our method can significantly outperform state-of-the-art method.
+\end{abstract}
+
+
+\section{Introducion}
+Hello world!
+
+\section{Related Work}
+
+
+\subsection{TransE}
+
+Inspired by the word embedding work(Mikolov et al.2013), TransE(Bordes et al.2013) model translates the latent feature representations via a relation-specific offset between head and tail entities on the low-dimensional vector space.To learn such embeddings,TransE minimize a margin-based ranking criterion over the training set:
+\begin{equation}
+L=\sum_{(h,r,t) \in S}\sum_{(h',r,t') \in S'_{(h,r,t)}}[\gamma + d(h+r,t)-d(h'+r,t')]_+
+\end{equation}
+where$[x]_+$ denotes the positive part of $x$,$\gamma >0$ is a margin hyperparameter,and
+\begin{equation}
+S'_{(h,r,t)}=\{(h',r,t)|h' \in E)\} \cup \{(h,r,t¡¯)|t' \in E)\}
+\end{equation}
+The optimization is carried out by stochastic gradient descent(in minibatch mode),over the possible $h,r$ and $t$,with the additional constraints that the $L_2$-norm of the embeddings of the entities is 1(no regularization or norm constraints are given to the label embeddings $r$).
+\subsection{Topic Model for Short Texts}
+
+Topic models have been proposed to uncover the latent semantic structure from text corpus.The conventional topic models ,such as LDA and PLSA, implicitly capture the document-level word co-occurrence patterns to reveal topics and thus suffer from the severe data sparsity in short text.BTM(Yan,2013) can discover more prominent and coherent topics for short text ,which explicitly models the word co-occurrence patterns to enhance the topic learning and uses the aggregated patterns in the whole corpus.
+
+\subsection{Transfer Learning}
+
+The study of transfer learning is motivated by the fact that people can intelligently apply knowledge learned previously to solve new problems faster or with better solutions.
+Given a source domain $D_S$ and learning task $T_S$,a target domain $D_T$ and learning task $T_T$,transfer learning aims to help improve the learning of the target predictive function$f_T(.)$ in $D_T$ using the knowledge in $D_S$ and $T_S$,where $D_S \neq D_T$,or $T_S \neq T_T$.
+
+\section{Our Method}
+In this section,we introduce the transfer learning based TransE(TransT) that learns representations of entities and relations utilizing the topic model of short entity description.
+In TransE and TransT,we have entity set \textbf{E} and relation set \textbf{R},and learn to encode both entities and relations in  $\mathbb{R}^k$.
+Given a KG represented by a set of triples $S={(h,r,t)}$ with each triple composed of two entities $h,t \in E$ and their relation $r \in R$ ,there are also concise text for most entities in the KG.
+We learn the topics by directly modeling the generation of entity co-occurrence patterns in the entities description corpora by Biterm topic model and transfer the topic model of the entity description to the knowledge embedding with transfer learning method.
+
+\subsection{Transferring the Biterm Topic Model to Entities Embedding}
+\label{sect:pdf}
+
+From the task of Biterm topic model,we learn the topic distribution $\theta$ of entity description which can represent the semantic of the entities well.Each topic model of the entity can transfer to its embedding by the feature representation transferring method.
+
+\begin{equation}
+h^*=h + \lambda\cdot \theta_h,
+t^*=t + \lambda\cdot \theta_t
+\end{equation}
+
+
+
+\subsection{Training the Whole Knowledge Graph}
+\label{ssec:layout}
+We minimize th following margin-based score function as objective for training:
+
+\begin{equation}
+L=\sum_{(h,r,t) \in S}\sum_{(h',r,t') \in S'_{(h,r,t)}}[\gamma + d(h^*+r,t^*)-d(h'^*+r,t'^*)]_+
+\end{equation}
+
+
+\section{Experiment}
+\subsection{Datesets and Experiment Settings}
+\subsubsection {Datasets}
+In this paper,we adopt FB15K(Bordes et al. 2013),a dataset extracted from a typical large-scale KG Freebase(Bollacker et al.2008),to evaluate the TranTL model on knowledge graph completion and entity classification.
+
+\begin{table}[htbp]
+\centering
+\caption{\label{comparison}Statistic of data sets}
+\begin{tabular}{c|c|c|c|c|c}
+\hline
+Dataset & \#Rel & \#Ent & \#Train & \#Valid & \#Test \\
+\hline
+FB15K & 1341 & 14904 & 472860 & 48991 & 57803 \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\subsubsection {Parameter Settings}
+
+We implement TransE,TransT for comparison.We train those model with entity/relation dimension $n$ in \{30,60,90\}.Following(Bordes et al.2013),we use a fixed learning rate $\lambda$ among \{0.0005,0.001,0.002\},and margin $\gamma$ among \{0.5,1.0,1.5,2.0\}.We also use a fixed transferring rate $\alpha$ among \{0.4,0.6,0.8,1\}.The optimal configurations of TransT are : $\lambda=0.002,\gamma=1.0,n=60,\alpha=1$.
+
+
+
+\subsection{Knowledge Graph Completion}
+
+The task of knowledge graph completion aims to complete a triple $(h,r,t)$ when one of $h,r,t$ is missing based on minimizing the score function $S(h,r,t)=||(h+\alpha \theta_h) + r - (t + \alpha \theta_t)||$
+
+\subsubsection{Evaluation}
+
+We conduct our evaluation on FB15K and consider the knowledge graph completion task as two sub-tasks:entity prediction and relation prediction.Following(Bordes et al.2013),we use two measures as our evaluation metrics:(1) mean rank of correct entities;(2)proportion of valid entities ranked in top 10(for entity) or  top 1(for relation).We also follow the two evaluation settings named as "Raw" and "Filter".
+
+
+\subsubsection{Result}
+
+The results of entity prediction and relation prediction are in Table 2 and Table3.
+
+
+\begin{table}[htbp]
+\centering
+\caption{\label{comparison}Evaluation results on entity prediction}
+\begin{tabular}{c|c|c|c|c}
+\hline
+ \multirow{2}{*}{Metric} & \multicolumn{2}{|c|}{Mean Rank} & \multicolumn{2}{|c}{Hits@10(\%)} \\
+\cline{2-5}
+ & Raw & Filter & Raw & Filter\\
+\hline
+TransE     &  210   & 119 &  48.5  &  66.1 \\
+
+\hline
+TransT     &  0   & 0 &  0  &  0 \\
+
+\hline
+\end{tabular}
+\end{table}
+
+
+
+\begin{table}[htbp]
+\centering
+\caption{\label{comparison}Evaluation results on relation prediction}
+\begin{tabular}{c|c|c|c|c}
+\hline
+ \multirow{2}{*}{Metric} & \multicolumn{2}{|c|}{Mean Rank} & \multicolumn{2}{|c}{Hits@10(\%)} \\
+\cline{2-5}
+ & Raw & Filter & Raw & Filter\\
+\hline
+TransE     &  2.91   & 2.53 &  69.5  &  90.2 \\
+
+\hline
+TransT     &  0   & 0 &  0  &  0 \\
+
+\hline
+
+
+\end{tabular}
+\end{table}
+
+\subsection{Entity Classification}
+
+The task of entity classification is a multilabel classification task aiming to predict entit types,which is crucial and widely used in many NLP tasks.
+
+\subsubsection{Evaluation}
+In training,we use entity reresentaions learned by BTM,TransE,TransT trained on FB15K as features.We use Logistic Regression as classifier and one-versus-rest for multilabel classification.For evaluation following(Neeklakantan and Chang 2015),we use mean average precision(MAP) which is commonly used in mulitlabel classification as the evaluation method for entity classification.
+
+
+\subsubsection{Result}
+
+From Table 4 we observe that TranT outperforms all other models in FB15K.
+
+\begin{table}[htbp]
+\centering
+\caption{\label{comparison}Evaluation results on entity classification}
+\begin{tabular}{c|c}
+\hline
+Metric & FB15K   \\
+\hline
+TransE & 87.9   \\
+\hline
+BTM & 87.9   \\
+\hline
+TransT & 87.9   \\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+\section{Conclusion and Future Work}
+In this paper,we introduced a novel method of transferring the topic model of entity description to knowledge embedding.In experiments,we evaluate our method on knowledge graph completion and entity classification.Experimental results show that our method achieves better performances than the baselines on both tasks,which indicates the capability of building representations from entity descriptions.
+\hspace*{0.5cm} We will explore the following research directions in future:(1)we will adopt other representation method of entity description,just like tdidf or doc2vec.(2)there are various of information like textural information of relation or entity types,we will use the representation learning of these information to transfer learning of knowledge graph embedding.(3)we will combine some representation of entity description for transfer learning of knowledge graph embedding.
+
+\section{ Acknowledgments}
+AAAI is especially grateful to Peter Patel Schneider for his work in implementing the aaai.sty file, liberally using the ideas of other style hackers, including Barbara Beeton. We also acknowledge with thanks the work of George Ferguson for his guide to using the style and BibTeX files --- which has been incorporated into this document  --- and Hans Guesgen, who provided several timely modifications, as well as the many others who have, from time to time, sent in suggestions on improvements to the AAAI style.
+
+
+\end{document}

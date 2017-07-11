@@ -1,0 +1,14 @@
+\documentclass[Nomencl]{SelimArticle}
+\input{./options}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\begin{document}
+\mytitlepage
+\tableofcontents
+\newpage
+\printnomenclature % Use makeidx.bat followed by two pdflatex reruns.
+\newpage
+% Begin writing here.
+
+\bibliographystyle{IEEEtran}
+\bibliography{dabib}
+\end{document}
