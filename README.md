@@ -1,7 +1,7 @@
 ds_re
 ==============================
 
-distance supervise for relation extraction
+distant supervision  for relation extraction
 
 Project Organization
 ------------
